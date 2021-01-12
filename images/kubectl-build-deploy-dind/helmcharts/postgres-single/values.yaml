@@ -23,8 +23,15 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name:
 
-podSecurityContext: {}
-  # fsGroup: 2000
+# This flag controls the injection of the pod securityContext values below.
+# It is intended to assist with phased rollout of rootless workloads.
+# It is set to true via the build-time environment variable:
+# LAGOON_ROOTLESS_WORKLOAD=true
+rootless: false
+podSecurityContext:
+  fsGroup: 10001
+  runAsGroup: 0
+  runAsUser: 10000
 
 securityContext: {}
   # capabilities:
