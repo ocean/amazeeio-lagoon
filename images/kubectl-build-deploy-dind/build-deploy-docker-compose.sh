@@ -535,6 +535,7 @@ yq write -i -- /kubectl-build-deploy/values.yaml 'lagoonVersion' $LAGOON_VERSION
 if [[ $LAGOON_ROOTLESS_WORKLOAD = true ]]; then
 	yq write -i -- /kubectl-build-deploy/values.yaml 'rootless' true
 fi
+yq write -i -- /kubectl-build-deploy/values.yaml 'rootless' true
 
 
 echo -e "\
