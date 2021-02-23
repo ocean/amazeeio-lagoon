@@ -14,8 +14,8 @@ RUN apk update \
     && apk upgrade \
     && apk add --no-cache curl tini \
     && rm -rf /var/cache/apk/* \
-    && curl -sLo /bin/ep https://github.com/kreuzwerker/envplate/releases/download/1.0.0-RC1/ep-linux \
-    && echo "48e234e067874a57a4d4bb198b5558d483ee37bcc285287fffb3864818b42f2785be0568faacbc054e97ca1c5047ec70382e1ca0e71182c9dba06649ad83a5f6  /bin/ep" | sha512sum -c \
+    && curl -sLo /bin/ep https://github.com/kreuzwerker/envplate/releases/download/1.0.0-RC1/ep-linux-arm \
+    && echo "54b9b118ec7ad4b2b3a4cd7028273a23736498a56582dc57da9234a5ef050f0a621a7b0624bf279e1d9d8d3546cab3e15a520258698f3b48a8acc22069df3214  /bin/ep" | sha512sum -c \
     && chmod +x /bin/ep \
     && curl -sLo /lagoon/bin/cron https://github.com/christophlehmann/go-crond/releases/download/0.6.1-2-g7022a21/go-crond-64-linux \
     && echo "4ecbf269a00416086a855b760b6a691d1b8a6385adb18debec893bdbebccd20822b945c476406e3ca27c784812027c23745048fadc36c4067f12038aff972dce  /lagoon/bin/cron" | sha512sum -c \
