@@ -52,7 +52,7 @@ SHELL := /bin/bash
 #######
 
 # Parameter for all `docker build` commands, can be overwritten by passing `DOCKER_BUILD_PARAMS=` via the `-e` option
-DOCKER_BUILD_PARAMS := --quiet
+DOCKER_BUILD_PARAMS := --platform linux/arm64
 
 # On CI systems like jenkins we need a way to run multiple testings at the same time. We expect the
 # CI systems to define an Environment variable CI_BUILD_TAG which uniquely identifies each build.
@@ -86,7 +86,7 @@ K3D_VERSION := 1.4.0
 K3D_NAME := k3s-$(shell echo $(CI_BUILD_TAG) | sed -E 's/.*(.{31})$$/\1/')
 
 # Name of the Branch we are currently in
-BRANCH_NAME :=
+BRANCH_NAME := v1.6.0
 DEFAULT_ALPINE_VERSION := 3.11
 
 #######
@@ -116,6 +116,9 @@ docker_build_node = docker build $(DOCKER_BUILD_PARAMS) --build-arg LAGOON_VERSI
 
 docker_build_solr = docker build $(DOCKER_BUILD_PARAMS) --build-arg LAGOON_VERSION=$(LAGOON_VERSION) --build-arg IMAGE_REPO=$(CI_BUILD_TAG) --build-arg SOLR_MAJ_MIN_VERSION=$(1) -t $(CI_BUILD_TAG)/solr:$(2) -f $(3) $(4)
 
+# Tags an image with the `oceanic` repository and pushes it
+docker_publish_oceanic = docker tag $(CI_BUILD_TAG)/$(1) oceanic/lagoon-$(2) && docker push oceanic/lagoon-$(2) | cat
+
 # Tags an image with the `amazeeio` repository and pushes it
 docker_publish_amazeeio = docker tag $(CI_BUILD_TAG)/$(1) amazeeio/$(2) && docker push amazeeio/$(2) | cat
 
@@ -128,15 +131,8 @@ docker_publish_amazeeiolagoon = docker tag $(CI_BUILD_TAG)/$(1) amazeeiolagoon/$
 #######
 ####### Base Images are the base for all other images and are also published for clients to use during local development
 
-images :=     oc \
-							kubectl \
-							mariadb \
+images :=     mariadb \
 							mariadb-drupal \
-							postgres \
-							postgres-ckan \
-							postgres-drupal \
-							oc-build-deploy-dind \
-							kubectl-build-deploy-dind \
 							commons \
 							nginx \
 							nginx-drupal \
@@ -146,10 +142,6 @@ images :=     oc \
 							varnish-persistent-drupal \
 							redis \
 							redis-persistent \
-							rabbitmq \
-							rabbitmq-cluster \
-							mongo \
-							athenapdf-service \
 							curator \
 							docker-host \
 							toolbox
@@ -178,9 +170,9 @@ $(build-images):
 #    changed on the Dockerfiles
 build/mariadb: build/commons images/mariadb/Dockerfile
 build/mariadb-drupal: build/mariadb images/mariadb-drupal/Dockerfile
-build/postgres: build/commons images/postgres/Dockerfile
-build/postgres-ckan: build/postgres images/postgres-ckan/Dockerfile
-build/postgres-drupal: build/postgres images/postgres-drupal/Dockerfile
+# build/postgres: build/commons images/postgres/Dockerfile
+# build/postgres-ckan: build/postgres images/postgres-ckan/Dockerfile
+# build/postgres-drupal: build/postgres images/postgres-drupal/Dockerfile
 build/commons: images/commons/Dockerfile
 build/nginx: build/commons images/nginx/Dockerfile
 build/nginx-drupal: build/nginx images/nginx-drupal/Dockerfile
@@ -190,17 +182,17 @@ build/varnish-persistent: build/varnish images/varnish/Dockerfile
 build/varnish-persistent-drupal: build/varnish-persistent images/varnish-drupal/Dockerfile
 build/redis: build/commons images/redis/Dockerfile
 build/redis-persistent: build/redis images/redis-persistent/Dockerfile
-build/rabbitmq: build/commons images/rabbitmq/Dockerfile
-build/rabbitmq-cluster: build/rabbitmq images/rabbitmq-cluster/Dockerfile
-build/mongo: build/commons images/mongo/Dockerfile
+# build/rabbitmq: build/commons images/rabbitmq/Dockerfile
+# build/rabbitmq-cluster: build/rabbitmq images/rabbitmq-cluster/Dockerfile
+# build/mongo: build/commons images/mongo/Dockerfile
 build/docker-host: build/commons images/docker-host/Dockerfile
-build/oc: build/commons images/oc/Dockerfile
-build/kubectl: build/commons images/kubectl/Dockerfile
+# build/oc: build/commons images/oc/Dockerfile
+# build/kubectl: build/commons images/kubectl/Dockerfile
 build/curator: build/commons images/curator/Dockerfile
-build/oc-build-deploy-dind: build/oc images/oc-build-deploy-dind
-build/athenapdf-service: build/commons images/athenapdf-service/Dockerfile
+# build/oc-build-deploy-dind: build/oc images/oc-build-deploy-dind
+# build/athenapdf-service: build/commons images/athenapdf-service/Dockerfile
 build/toolbox: build/commons images/toolbox/Dockerfile
-build/kubectl-build-deploy-dind: build/kubectl images/kubectl-build-deploy-dind
+# build/kubectl-build-deploy-dind: build/kubectl images/kubectl-build-deploy-dind
 
 
 #######
@@ -226,7 +218,7 @@ $(build-elasticimages): build/commons
 # Touch an empty file which make itself is using to understand when the image has been last build
 	touch $@
 
-base-images-with-versions += $(elasticimages)
+# base-images-with-versions += $(elasticimages)
 s3-images += $(elasticimages)
 
 build/elasticsearch__6 build/elasticsearch__7 build/kibana__6 build/kibana__7 build/logstash__6 build/logstash__7: images/commons
@@ -256,7 +248,7 @@ $(build-pythonimages): build/commons
 # Touch an empty file which make itself is using to understand when the image has been last build
 	touch $@
 
-base-images-with-versions += $(pythonimages)
+# base-images-with-versions += $(pythonimages)
 s3-images += $(pythonimages)
 
 build/python__2.7 build/python__3.7: images/commons
@@ -269,13 +261,10 @@ build/python__2.7-ckandatapusher: build/python__2.7
 #######
 ####### PHP Images are alpine linux based PHP images.
 
-phpimages := 	php__7.2-fpm \
-				php__7.3-fpm \
+phpimages := 	php__7.3-fpm \
 				php__7.4-fpm \
-				php__7.2-cli \
 				php__7.3-cli \
 				php__7.4-cli \
-				php__7.2-cli-drupal \
 				php__7.3-cli-drupal \
 				php__7.4-cli-drupal
 
@@ -317,13 +306,10 @@ build/php__7.4-cli-drupal: build/php__7.4-cli
 #######
 ####### Solr Images are alpine linux based Solr images.
 
-solrimages := 	solr__5.5 \
-				solr__6.6 \
+solrimages := 	solr__6.6 \
 				solr__7.7 \
-				solr__5.5-drupal \
 				solr__6.6-drupal \
 				solr__7.7-drupal \
-				solr__5.5-ckan \
 				solr__6.6-ckan
 
 
@@ -358,10 +344,8 @@ build/solr__6.6-ckan: build/solr__6.6
 
 nodeimages := 	node__14 \
 				node__12 \
-				node__10 \
 				node__14-builder \
 				node__12-builder \
-				node__10-builder \
 
 build-nodeimages = $(foreach image,$(nodeimages),build/$(image))
 
@@ -395,11 +379,11 @@ build/node__10-builder: build/node__10 images/node/builder/Dockerfile
 
 # Yarn Workspace Image which builds the Yarn Workspace within a single image. This image will be
 # used by all microservices based on Node.js to not build similar node packages again
-build-images += yarn-workspace-builder
-build/yarn-workspace-builder: build/node__10-builder images/yarn-workspace-builder/Dockerfile
-	$(eval image = $(subst build/,,$@))
-	$(call docker_build,$(image),images/$(image)/Dockerfile,.)
-	touch $@
+# build-images += yarn-workspace-builder
+# build/yarn-workspace-builder: build/node__10-builder images/yarn-workspace-builder/Dockerfile
+# 	$(eval image = $(subst build/,,$@))
+# 	$(call docker_build,$(image),images/$(image)/Dockerfile,.)
+# 	touch $@
 
 # Variables of service images we manage and build
 services :=       api \
@@ -518,7 +502,8 @@ s3-images += $(service-images)
 
 # Builds all Images
 .PHONY: build
-build: $(foreach image,$(base-images) $(base-images-with-versions) $(service-images),build/$(image))
+# build: $(foreach image,$(base-images) $(base-images-with-versions) $(service-images),build/$(image))
+build: $(foreach image,$(base-images) $(base-images-with-versions),build/$(image))
 # Outputs a list of all Images we manage
 .PHONY: build-list
 build-list:
@@ -706,6 +691,44 @@ lagoon-kickstart: $(foreach image,$(deployment-test-services-rest),build/$(image
 # Start only the local Harbor for testing purposes
 local-harbor: build/harbor-core build/harbor-database build/harbor-jobservice build/harbor-portal build/harbor-nginx build/harbor-redis build/harborregistry build/harborregistryctl build/harbor-trivy build/local-minio
 	IMAGE_REPO=$(CI_BUILD_TAG) docker-compose -p $(CI_BUILD_TAG) --compatibility up -d harbor-core harbor-database harbor-jobservice harbor-portal harbor-nginx harbor-redis harborregistry harborregistryctl harbor-trivy local-minio
+
+# =================================== Publish "oceanic" Docker Hub images
+
+# Publish command to amazeeio docker hub, this should probably only be done during a master deployments
+publish-oceanic-baseimages = $(foreach image,$(base-images),[publish-oceanic-baseimages]-$(image))
+publish-oceanic-baseimages-with-versions = $(foreach image,$(base-images-with-versions),[publish-oceanic-baseimages-with-versions]-$(image))
+# tag and push all images
+.PHONY: publish-oceanic-baseimages
+publish-oceanic-baseimages: $(publish-oceanic-baseimages) $(publish-oceanic-baseimages-with-versions)
+
+
+# tag and push of each image
+.PHONY: $(publish-oceanic-baseimages)
+$(publish-oceanic-baseimages):
+#   Calling docker_publish for image, but remove the prefix '[publish-oceanic-baseimages]-' first
+		$(eval image = $(subst [publish-oceanic-baseimages]-,,$@))
+# 	Publish images as :latest
+		$(call docker_publish_oceanic,$(image),$(image):latest)
+# 	Publish images with version tag
+		$(call docker_publish_oceanic,$(image),$(image):$(LAGOON_VERSION))
+
+
+# tag and push of base image with version
+.PHONY: $(publish-oceanic-baseimages-with-versions)
+$(publish-oceanic-baseimages-with-versions):
+#   Calling docker_publish for image, but remove the prefix '[publish-oceanic-baseimages-with-versions]-' first
+		$(eval image = $(subst [publish-oceanic-baseimages-with-versions]-,,$@))
+#   The underline is a placeholder for a colon, replace that
+		$(eval image = $(subst __,:,$(image)))
+#		These images already use a tag to differentiate between different versions of the service itself (like node:9 and node:10)
+#		We push a version without the `-latest` suffix
+		$(call docker_publish_oceanic,$(image),$(image))
+#		Plus a version with the `-latest` suffix, this makes it easier for people with automated testing
+		$(call docker_publish_oceanic,$(image),$(image)-latest)
+#		We add the Lagoon Version just as a dash
+		$(call docker_publish_oceanic,$(image),$(image)-$(LAGOON_VERSION))
+
+# ===================================
 
 # Publish command to amazeeio docker hub, this should probably only be done during a master deployments
 publish-amazeeio-baseimages = $(foreach image,$(base-images),[publish-amazeeio-baseimages]-$(image))
