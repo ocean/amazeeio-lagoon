@@ -57,11 +57,12 @@ DOCKER_BUILD_PARAMS := --platform linux/arm64
 # On CI systems like jenkins we need a way to run multiple testings at the same time. We expect the
 # CI systems to define an Environment variable CI_BUILD_TAG which uniquely identifies each build.
 # If it's not set we assume that we are running local and just call it lagoon.
-CI_BUILD_TAG ?= lagoon
+CI_BUILD_TAG ?= oceanic
 
 # Local environment
 ARCH := $(shell uname | tr '[:upper:]' '[:lower:]')
-LAGOON_VERSION := $(shell git describe --tags --exact-match 2>/dev/null || echo development)
+# LAGOON_VERSION := $(shell git describe --tags --exact-match 2>/dev/null || echo development)
+LAGOON_VERSION := v1.6.0
 DOCKER_DRIVER := $(shell docker info -f '{{.Driver}}')
 
 # Version and Hash of the OpenShift cli that should be downloaded
@@ -95,13 +96,13 @@ DEFAULT_ALPINE_VERSION := 3.11
 
 # Builds a docker image. Expects as arguments: name of the image, location of Dockerfile, path of
 # Docker Build Context
-docker_build = docker build $(DOCKER_BUILD_PARAMS) --build-arg LAGOON_VERSION=$(LAGOON_VERSION) --build-arg IMAGE_REPO=$(CI_BUILD_TAG) --build-arg ALPINE_VERSION=$(DEFAULT_ALPINE_VERSION) -t $(CI_BUILD_TAG)/$(1) -f $(2) $(3)
+docker_build = docker buildx build $(DOCKER_BUILD_PARAMS) --build-arg LAGOON_VERSION=$(LAGOON_VERSION) --build-arg IMAGE_REPO=$(CI_BUILD_TAG) --build-arg ALPINE_VERSION=$(DEFAULT_ALPINE_VERSION) -t $(CI_BUILD_TAG)/lagoon-$(1):$(LAGOON_VERSION) --push -f $(2) $(3)
 
 # Build a Python docker image. Expects as arguments:
 # 1. Python version
 # 2. Location of Dockerfile
 # 3. Path of Docker Build context
-docker_build_python = docker build $(DOCKER_BUILD_PARAMS) --build-arg LAGOON_VERSION=$(LAGOON_VERSION) --build-arg IMAGE_REPO=$(CI_BUILD_TAG) --build-arg PYTHON_VERSION=$(1) --build-arg ALPINE_VERSION=$(2) -t $(CI_BUILD_TAG)/python:$(3) -f $(4) $(5)
+docker_build_python = docker buildx build $(DOCKER_BUILD_PARAMS) --build-arg LAGOON_VERSION=$(LAGOON_VERSION) --build-arg IMAGE_REPO=$(CI_BUILD_TAG) --build-arg PYTHON_VERSION=$(1) --build-arg ALPINE_VERSION=$(2) -t $(CI_BUILD_TAG)/lagoon-python:$(3) --push -f $(4) $(5)
 
 docker_build_elastic = docker build $(DOCKER_BUILD_PARAMS) --build-arg LAGOON_VERSION=$(LAGOON_VERSION) --build-arg IMAGE_REPO=$(CI_BUILD_TAG) -t $(CI_BUILD_TAG)/$(2):$(1) -f $(3) $(4)
 
@@ -110,11 +111,11 @@ docker_build_elastic = docker build $(DOCKER_BUILD_PARAMS) --build-arg LAGOON_VE
 # 2. PHP version and type of image (ie 7.3-fpm, 7.3-cli etc)
 # 3. Location of Dockerfile
 # 4. Path of Docker Build Context
-docker_build_php = docker build $(DOCKER_BUILD_PARAMS) --build-arg LAGOON_VERSION=$(LAGOON_VERSION) --build-arg IMAGE_REPO=$(CI_BUILD_TAG) --build-arg PHP_VERSION=$(1)  --build-arg PHP_IMAGE_VERSION=$(1) --build-arg ALPINE_VERSION=$(2) -t $(CI_BUILD_TAG)/php:$(3) -f $(4) $(5)
+docker_build_php = docker buildx build $(DOCKER_BUILD_PARAMS) --build-arg LAGOON_VERSION=$(LAGOON_VERSION) --build-arg IMAGE_REPO=$(CI_BUILD_TAG) --build-arg PHP_VERSION=$(1)  --build-arg PHP_IMAGE_VERSION=$(1) --build-arg ALPINE_VERSION=$(2) -t $(CI_BUILD_TAG)/lagoon-php:$(3)-$(LAGOON_VERSION) --push -f $(4) $(5)
 
-docker_build_node = docker build $(DOCKER_BUILD_PARAMS) --build-arg LAGOON_VERSION=$(LAGOON_VERSION) --build-arg IMAGE_REPO=$(CI_BUILD_TAG) --build-arg NODE_VERSION=$(1) --build-arg ALPINE_VERSION=$(2) -t $(CI_BUILD_TAG)/node:$(3) -f $(4) $(5)
+docker_build_node = docker buildx build $(DOCKER_BUILD_PARAMS) --build-arg LAGOON_VERSION=$(LAGOON_VERSION) --build-arg IMAGE_REPO=$(CI_BUILD_TAG) --build-arg NODE_VERSION=$(1) --build-arg ALPINE_VERSION=$(2) -t $(CI_BUILD_TAG)/lagoon-node:$(3) --push -f $(4) $(5)
 
-docker_build_solr = docker build $(DOCKER_BUILD_PARAMS) --build-arg LAGOON_VERSION=$(LAGOON_VERSION) --build-arg IMAGE_REPO=$(CI_BUILD_TAG) --build-arg SOLR_MAJ_MIN_VERSION=$(1) -t $(CI_BUILD_TAG)/solr:$(2) -f $(3) $(4)
+docker_build_solr = docker buildx build $(DOCKER_BUILD_PARAMS) --build-arg LAGOON_VERSION=$(LAGOON_VERSION) --build-arg IMAGE_REPO=$(CI_BUILD_TAG) --build-arg SOLR_MAJ_MIN_VERSION=$(1) -t $(CI_BUILD_TAG)/lagoon-solr:$(2)-$(LAGOON_VERSION) --push -f $(3) $(4)
 
 # Tags an image with the `oceanic` repository and pushes it
 docker_publish_oceanic = docker tag $(CI_BUILD_TAG)/$(1) oceanic/lagoon-$(2) && docker push oceanic/lagoon-$(2) | cat
@@ -141,10 +142,7 @@ images :=     mariadb \
 							varnish-persistent \
 							varnish-persistent-drupal \
 							redis \
-							redis-persistent \
-							curator \
-							docker-host \
-							toolbox
+							redis-persistent
 
 # base-images is a variable that will be constantly filled with all base image there are
 base-images += $(images)
@@ -363,7 +361,7 @@ $(build-nodeimages): build/commons
 # Touch an empty file which make itself is using to understand when the image has been last build
 	touch $@
 
-base-images-with-versions += $(nodeimages)
+# base-images-with-versions += $(nodeimages)
 s3-images += $(nodeimages)
 
 build/node__10 build/node__12 build/node__14: images/commons images/node/Dockerfile
