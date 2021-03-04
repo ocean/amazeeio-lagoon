@@ -1,7 +1,8 @@
 ARG NODE_VERSION
 ARG ALPINE_VERSION
 ARG IMAGE_REPO
-FROM ${IMAGE_REPO:-lagoon}/commons as commons
+ARG LAGOON_VERSION
+FROM ${IMAGE_REPO:-lagoon}/lagoon-commons:${LAGOON_VERSION} as commons
 FROM node:${NODE_VERSION}-alpine${ALPINE_VERSION}
 
 LABEL maintainer="amazee.io"

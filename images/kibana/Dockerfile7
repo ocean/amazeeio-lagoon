@@ -1,5 +1,6 @@
 ARG IMAGE_REPO
-FROM ${IMAGE_REPO:-lagoon}/commons as commons
+ARG LAGOON_VERSION
+FROM ${IMAGE_REPO:-lagoon}/lagoon-commons:${LAGOON_VERSION} as commons
 FROM docker.elastic.co/kibana/kibana:7.6.1
 
 LABEL maintainer="amazee.io"

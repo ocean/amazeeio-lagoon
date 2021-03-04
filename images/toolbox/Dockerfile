@@ -1,8 +1,8 @@
 ARG IMAGE_REPO
+ARG LAGOON_VERSION
+FROM ${IMAGE_REPO:-lagoon}/lagoon-mariadb as mariadb
 
-FROM ${IMAGE_REPO:-lagoon}/mariadb as mariadb
-
-FROM ${IMAGE_REPO:-lagoon}/commons as commons
+FROM ${IMAGE_REPO:-lagoon}/lagoon-commons:${LAGOON_VERSION} as commons
 
 LABEL maintainer="amazee.io"
 

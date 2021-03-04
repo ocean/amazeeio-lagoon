@@ -1,6 +1,7 @@
 ARG SOLR_MAJ_MIN_VERSION
 ARG IMAGE_REPO
-FROM ${IMAGE_REPO:-lagoon}/commons as commons
+ARG LAGOON_VERSION
+FROM ${IMAGE_REPO:-lagoon}/lagoon-commons:${LAGOON_VERSION} as commons
 FROM solr:${SOLR_MAJ_MIN_VERSION}-alpine
 
 LABEL maintainer="amazee.io"

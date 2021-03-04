@@ -1,5 +1,6 @@
 ARG IMAGE_REPO
-FROM ${IMAGE_REPO:-lagoon}/commons as commons
+ARG LAGOON_VERSION
+FROM ${IMAGE_REPO:-lagoon}/lagoon-commons:${LAGOON_VERSION} as commons
 FROM ubuntu:18.04
 
 LABEL maintainer="amazee.io"

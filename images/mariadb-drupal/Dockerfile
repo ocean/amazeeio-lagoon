@@ -1,5 +1,6 @@
 ARG IMAGE_REPO
-FROM ${IMAGE_REPO:-lagoon}/mariadb
+ARG LAGOON_VERSION
+FROM ${IMAGE_REPO:-lagoon}/lagoon-mariadb:${LAGOON_VERSION}
 
 ENV MARIADB_DATABASE=drupal \
     MARIADB_USER=drupal \

@@ -1,5 +1,6 @@
 ARG IMAGE_REPO
-FROM ${IMAGE_REPO:-lagoon}/varnish
+ARG LAGOON_VERSION
+FROM ${IMAGE_REPO:-lagoon}/lagoon-varnish:${LAGOON_VERSION}
 
 VOLUME /var/cache/varnish
 

@@ -1,5 +1,6 @@
 ARG IMAGE_REPO
-FROM ${IMAGE_REPO:-lagoon}/nginx
+ARG LAGOON_VERSION
+FROM ${IMAGE_REPO:-lagoon}/lagoon-nginx:${LAGOON_VERSION}
 
 LABEL maintainer="amazee.io"
 ENV LAGOON=nginx

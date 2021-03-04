@@ -1,7 +1,8 @@
 ARG PHP_VERSION
 ARG PHP_IMAGE_VERSION
 ARG IMAGE_REPO
-FROM ${IMAGE_REPO:-lagoon}/php:${PHP_VERSION}-cli
+ARG LAGOON_VERSION
+FROM ${IMAGE_REPO:-lagoon}/lagoon-php:${PHP_VERSION}-cli-${LAGOON_VERSION}
 
 LABEL maintainer="amazee.io"
 ENV LAGOON=cli-drupal

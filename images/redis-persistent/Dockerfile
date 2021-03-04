@@ -1,4 +1,5 @@
 ARG IMAGE_REPO
-FROM ${IMAGE_REPO:-lagoon}/redis
+ARG LAGOON_VERSION
+FROM ${IMAGE_REPO:-lagoon}/lagoon-redis:${LAGOON_VERSION}
 
 ENV FLAVOR=persistent

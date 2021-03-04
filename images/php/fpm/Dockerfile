@@ -2,7 +2,8 @@ ARG PHP_VERSION
 ARG PHP_IMAGE_VERSION
 ARG ALPINE_VERSION
 ARG IMAGE_REPO
-FROM ${IMAGE_REPO:-lagoon}/commons as commons
+ARG LAGOON_VERSION
+FROM ${IMAGE_REPO:-lagoon}/lagoon-commons:${LAGOON_VERSION} as commons
 FROM php:${PHP_IMAGE_VERSION}-fpm-alpine${ALPINE_VERSION}
 
 LABEL maintainer="amazee.io"
