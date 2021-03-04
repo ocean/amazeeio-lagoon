@@ -14,11 +14,11 @@ RUN apk update \
     && apk upgrade \
     && apk add --no-cache curl tini \
     && rm -rf /var/cache/apk/* \
-    && curl -sLo /bin/ep https://github.com/kreuzwerker/envplate/releases/download/1.0.0-RC1/ep-linux-arm \
-    && echo "54b9b118ec7ad4b2b3a4cd7028273a23736498a56582dc57da9234a5ef050f0a621a7b0624bf279e1d9d8d3546cab3e15a520258698f3b48a8acc22069df3214  /bin/ep" | sha512sum -c \
+    && curl -sLo /bin/ep https://github.com/ocean/envplate/releases/download/1.0.0-rc2/ep-linux-arm64 \
+    && echo "e8e7a5b2617f7edb3c0aadc78637a52e75a7a0db75976d97f9fa617c79e3982b0672753bd3c8b2165684735265d9549e81250cfe62124d61d455c4fbdb670a83  /bin/ep" | sha512sum -c \
     && chmod +x /bin/ep \
-    && curl -sLo /lagoon/bin/cron https://github.com/christophlehmann/go-crond/releases/download/0.6.1-2-g7022a21/go-crond-64-linux \
-    && echo "4ecbf269a00416086a855b760b6a691d1b8a6385adb18debec893bdbebccd20822b945c476406e3ca27c784812027c23745048fadc36c4067f12038aff972dce  /lagoon/bin/cron" | sha512sum -c \
+    && curl -sLo /lagoon/bin/cron https://github.com/webdevops/go-crond/releases/download/20.7.0/go-crond-arm64-linux \
+    && echo "18716e7164fc302305fb495aa342e1ad162a82b48f4c190a5d967ff4e5b50cdd980b1d9fb55caca4ea1b94dcaf085d8c7076453c5287aeea5953fc93b81bb21a  /lagoon/bin/cron" | sha512sum -c \
     && chmod +x /lagoon/bin/cron \
     && mkdir -p /lagoon/crontabs && fix-permissions /lagoon/crontabs \
     && ln -s /home/.bashrc /home/.profile

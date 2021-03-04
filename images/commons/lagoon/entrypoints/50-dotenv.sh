@@ -20,7 +20,7 @@
 # first export all current environment variables into a file.
 # We do that in order to keep the hierarchy of environment variables. Already defined ones are probably overwritten
 # via an `docker run -e VAR=VAL` system and they should still be used even they are defined in dotenv files.
-TMPFILE=$(mktemp -t dotenv.XXXXXXXX)
+TMPFILE=$(busybox mktemp -t dotenv.XXXXXXXX)
 export -p > $TMPFILE
 
 # set -a is short for `set -o allexport` which will export all variables in a file
