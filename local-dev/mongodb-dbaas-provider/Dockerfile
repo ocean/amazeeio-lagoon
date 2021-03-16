@@ -1,4 +1,4 @@
-FROM mongo:4.2.3
+FROM mongo:4.4.3
 # generate a self signed mongodb with tls support
 COPY openssl-test-ca.cnf openssl-test-ca.cnf
 
